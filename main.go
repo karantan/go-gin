@@ -4,6 +4,7 @@ import (
 	"gogin/article"
 	"gogin/database"
 	"gogin/logger"
+	"gogin/user"
 
 	"github.com/gin-gonic/gin"
 )
@@ -65,7 +66,7 @@ type Server struct {
 func CreateNewServer(dbPath string) *Server {
 	db, err := database.GetDatabase(dbPath, false)
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 	s := &Server{DB: db}
 	s.Router = gin.Default()
@@ -75,9 +76,9 @@ func CreateNewServer(dbPath string) *Server {
 
 func (s *Server) MountHandlers() {
 	s.Router.GET("/", hello)
+	s.Router.POST("/login", user.Login)
 
-	// Simple group: v1
-	v1 := s.Router.Group("/api/v1")
+	v1 := s.Router.Group("/api/v1", user.AuthenticationCtx())
 	{
 		articles := v1.Group("/articles")
 		{
